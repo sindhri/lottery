@@ -1,0 +1,123 @@
+---
+title: "R lottery"
+output: html_notebook
+---
+
+What the project is about.
+The project is about explaining the probabilities of winning a lottery.
+
+What your goal is in this project.
+The goal is so that to educate the lottery addicts about buying more tickets would not increase the probabilities much towards winning the lottery.
+load resources 
+
+```{r}
+library(readr)
+library(purrr)
+```
+
+load the data
+```{r}
+lottery <- read_csv("649.csv")
+```
+Write a factorial function and a combination function
+```{r}
+factorial <- function (n){
+  result <- 1
+  for(i in 1:n) {
+    result <- result * n
+  }
+  return(result)
+}
+
+combination <- function (n, k) {
+  factorial(n)/factorial(k)/factorial(n-k)
+}
+```
+
+practice using list in pmap
+```{r}
+data1 <- c(1, 3, 5)
+data2 <- c(2, 4, 6)
+data3 <- c(8, 9, 7)
+
+unnamed_list <- list(data1,data2,data3)
+#how to access the values
+unnamed_list[[1]]
+unnamed_list[[1]][3]
+sum_on_each_position <- pmap(unnamed_list,function(x,y,z) x+y+z)
+#make the results easier to read
+unlist(sum_on_each_position)
+
+named_list <- list(first = data1, second= data2, third = data3)
+#how to access the values
+named_list[[1]]
+named_list[[1]][3]
+named_list$first
+named_list$first[3]
+#can't use pmap!! Giving a name is bad???
+pmap(named_list,function(x,y,z) x+y+z)
+named_list$first[1] + named_list$secon[1] + named_list$third[1]
+
+```
+Inside the app, the user inputs six different numbers from 1 to 49.
+Under the hood, the six numbers will come as an R vector and serve as an input to our function.
+The engineering team wants us to write a function that prints:
+the number of times the combination selected occurred in the Canada data set and
+the probability of winning the big prize in the next drawing with that combination.
+```{r}
+num_cols <- map_chr(1:6, function (x) paste("NUMBER DRAWN ", x))
+input <- c(1,2,3,4,5,6)
+vector1 <- c(1,2,3,3)
+vector2 <- c(2,4,3,1)
+vector3 <- c(3,2,3,2)
+vector4 <- c(4,2,3,4)
+vector5 <- c(5,1,4,5)
+vector6 <- c(6,4,2,6)
+vector_list <- list(vector1, vector2, vector3, vector4,vector5, vector6)
+
+to_vector <- function (v1,v2,v3,v4,v5,v6){
+  c(v1,v2,v3,v4,v5,v6)
+}
+check_historical_occurence <- function (vectors, input) {
+  result <- sum(unlist(map(vectors, function(x) setequal(x,input))))
+  ifelse(result > 0, TRUE, FALSE)
+}
+for(vector in vectors_temp){
+  print(vector)
+}
+
+history <- list(lottery$`NUMBER DRAWN 1`,lottery$`NUMBER DRAWN 2`,lottery$`NUMBER DRAWN 3`,lottery$`NUMBER DRAWN 4`,lottery$`NUMBER DRAWN 5`,lottery$`NUMBER DRAWN 6`)
+vectors <- pmap(history, to_vector)
+
+input1 <- c(1,2,3,4,5,6)
+input2 <- c(3, 12, 11, 14, 41, 43)
+check_historical_occurence(vectors, input1)
+check_historical_occurence(vectors, input2)
+
+probability_winning_next_prize <- 1/combination(49,6)
+```
+
+The probability of winning a lottery using one set of numbers is 0.00000001.
+
+```{r}
+multi_ticket_probability <- function (n) {
+  sprintf('The probability of winning using %.0f tickets is %.6f%%',n, n/combination(49,6)*100)
+}
+
+multi_ticket_probability(1)
+n_tickets <- c(1, 10, 100, 10000, 1000000, 6991908, 13983816)
+map(n_tickets, multi_ticket_probability)
+
+```
+write a function to caculate the probability of winning smaller prices, as matching 3, 4, 5 numbers.
+```{r}
+probability_less_6 <- function (n){
+  result <- 1/combination(49,n)
+  sprintf("The probability of winning %.0f number is %.6f%%",n, result*100)
+}
+
+probability_less_6(3)
+probability_less_6(4)
+probability_less_6(5)
+```
+
